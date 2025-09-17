@@ -1,4 +1,5 @@
 import math 
+from matplotlib import cm
 import numpy as np
 import matplotlib.pyplot as plt
 import roadNoise
@@ -22,7 +23,7 @@ class Mass:
         self.ay = -g
 class QCM:
     def __init__(self, ms, mu, k, c_percentage):
-        self.l = ms * g / k  # length of spring
+        self.l = (ms * g) / k   # length of spring
         self.mu = Mass(mu, 0)
         self.ms = Mass(ms, self.l)
         self.vx = constant_vel  #initial velocity of spring-damper
@@ -55,18 +56,42 @@ def step(qcm_obj, acceleration, velocity, position, time):
 #   Input: input force, total mass, damper coefficient, instantaneous velocity of system, spring stiffness, position, unsprung mass
 #   Output: acceleration of unsprung mass 
 def qcm_acceleration(f, m_sm, c, vy, k, spring_delta, m_usm):
-    return (f + (m_sm + m_usm) * g + c * vy + k * spring_delta) / m_usm
+    return (f + ((m_sm + m_usm) * g) + (c * vy) + (k * spring_delta)) / m_usm
 
 ## main ##
 
-for k in [10000, 20000, 30000, 40000]:
-    for c in range(11):
-        qcm = QCM(80, 15, k, c)
-        
+spring_constants = np.arange(10000, 105000, 5000) # spring const from 10000 to 105000, 5000 increments
+damping_percentages = np.arange(0.1, 1.05, 0.05)  #10% to 100%, 10% increments
+
+sprung_mass = 80   #kg
+unsprung_mass = 15 #kg
+
+average_a = np.zeros((len(spring_constants), len(damping_percentages)))
+
+for k in spring_constants:
+    for c in damping_percentages:
+        qcm = QCM(sprung_mass, unsprung_mass, k, c)
+
         net_a = np.zeros(len(time))
         for i in range(len(time)):
             net_a[i] = step(qcm, accelerations, velocities, positions, i)
 
-        print(np.average(net_a))
-    print()
-    
+        average_a[np.where(spring_constants == k)[0][0], np.where(damping_percentages == c)[0][0]] = np.average(net_a)
+
+fig, axs = plt.subplots(1)
+axs.plot(damping_percentages, average_a, 'tab:brown', label='average a v.s. c')
+axs.set_xlabel('Damping % of cd')
+axs.set_ylabel('Average Acceleration (m/s^2)')
+axs.set_title('Average Acceleration vs Damping % of CD')
+# fig = plt.figure()
+# ax = fig.add_subplot(projection='3d')
+
+# spring_constants, damping_percentages = np.meshgrid(spring_constants, damping_percentages)
+
+# ax.plot_surface(spring_constants, damping_percentages, average_a)
+# ax.set_title('SD of A v.s. K & C')
+# ax.set_xlabel('Spring Stiffness (N/m)')
+# ax.set_ylabel('Damping %')
+# ax.set_zlabel("Std. Dev of Acceleration (m/s^2)")
+
+plt.show()
