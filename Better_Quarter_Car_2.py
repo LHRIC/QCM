@@ -3,69 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import roadNoise
 import roadTrapezoid
+import qcm_types
 from scipy import integrate
 from scipy.integrate import odeint
 from scipy.interpolate import CubicSpline
-
-def qcm_dstate(state, vars, constants, t):
-    x1, x2, v1, v2 = state[:]
-    distance_road, vel_road, disp_road, time_array = vars[:]
-    m1, m2, k1, k2, c1, c2, l1_0, l2_0, g = constants[:]
-    
-    #interpolate for these values
-    vroad = np.interp(t,time_array, vel_road)
-    droad = np.interp(t,time_array, disp_road)
-    distance = np.interp(t,time_array, distance_road)
-
-    dstate = qcm_calcs(x1,x2,v1,v2,l1_0,l2_0,vroad,droad,distance)[0]
-    
-    return dstate
-
-def qcm_calcs(x1, x2, v1, v2, l1_0, l2_0 ,vroad, droad, distance):
-    #current spring lengths
-    l1 = x1 - droad
-    l2 = x2 - x1
-    
-    #set spring lengths to max uncompressed to prevent extension into tension
-    if l1 > l1_0:
-        l1 = l1_0
-    if l2 > l2_0:
-        l2 = l2_0
-
-    #Spring Forces
-    Fs1 = -k1*(l1 - l1_0) 
-    Fs2 = -k2*(l2 - l2_0)
-
-    #Damper forces
-    Fd1 = (v1-vroad)*c1
-    Fd2 = (v2-v1)*c2
-    if x1 > (droad + l1_0): #If QQM is off the ground, set bottom damper to zero
-        Fd1 = 0
-
-    #Net forces
-    F1 = Fs1 - Fd1
-    F2 = Fs2 - Fd2
-
-    print(F1)
-
-    # Calculate Derivatives of the State
-    dx1 = v1                        #v1
-    dx2 = v2                        #v2
-    dv1 = (F1-F2 - m1*g) / m1       #a1
-    dv2 = (F2 - m2*g) / m2          #a2
-
-    dstate = [dx1, dx2, dv1, dv2]
-
-    return [dstate, dv1, dv2, l1, l2, Fs1, Fs2, Fd1, Fd2]
+from constants import *
+from qcm_calculations import *
 
 #QCM INPUTS
 #define car input paramers
-g = 9.81            #m/s^2
-endtime = 2        #seconds
-step_time = 0.001   #seconds
-constant_vel = 15   #m/s
-time = np.linspace(0, endtime, math.floor(endtime/step_time+1))
-print(time.size)
 
 #define road profile
 road_distance = constant_vel * time #longitduinal meteres traveled)
@@ -77,38 +23,37 @@ road_step_vel = roadTrapezoid.trapezoid(road_distance, 0.3, 0.2, 20/1000, 0.2, 2
 road_vel_profile = road_step_vel + 10*road_noise_vel  #combined velocity in m/m profiles of bump trapezoid corresponds to x distance positions
 road_disp_profile = integrate.cumulative_simpson(road_vel_profile, x = road_distance, initial = 0) #integrated from velocity used as qcm input
 
-#car inputs
-m1 = 15         #kg mass 1 (unsprung)
-m2 = 80         #kg mass 2 (quarter car)
-k1 = 157000     #N/m    tire spring rate
-k2 = 30000      #N/m    suspension spring rate (single corner)
+# car parameters
+'mu = unsprung mass (kg)'
+'ms = sprung mass (kg)'
+'x1_0 = initial position of unsprung mass (m)'
+'x2_0 = initial position of sprung mass (m)'
+'v1_0 = initial velocity of unsprung mass (m/s)'
+'v2_0 = initial velocity of sprung mass (m/s)'
+'k1 = tire spring rate (N/m)'
+'k2 = suspension spring rate (N/m)'
+'c1_percentage = tire damper as percentage of critical damping (0 to 1)'
+'c2_percentage = suspension damper as percentage of critical damping (0 to 1)'
 
-#mass heights at equilibrium
-x1_0 = 200 / 1000    #m initial position of mass 1
-x2_0 = 500 / 1000    #m initial position of mass 2
-v1_0 = 0
-v2_0 = 0
+# create car object
+car = qcm_types.QuarterCarModel(mu = 15.0, 
+                      ms = 80.0, 
+                      x1_0 = 200 / 1000, 
+                      x2_0 = 500 / 1000, 
+                      k1 = 157000, 
+                      k2 = 30000, 
+                      c1_percentage = 0.2, 
+                      c2_percentage = 0.7)
 
-#l0 is spring length zero force, calcluated for static equilibrium initial condition of x1 and x2
-l1_0 = x1_0 + g*(m1+m2)/k1       #m
-l2_0 = x2_0 - x1_0 + g*m2/k2     #m
-
-#critical damping
-m1CD = 2*math.sqrt(k1*m1) 
-m2CD = 2*math.sqrt(k2*m2)
-
-#damping coefficients
-c1 = 0.2*m1CD      #N/m/s  tire damping
-c2 = 0.7*m2CD      #N/m/s  spring damping
+### black box
 
 #Initial Conditions 
-state_0 = [x1_0, x2_0, v1_0 ,v2_0]      #initial state x1, x2, v1, v2
-
-c = [m1, m2, k1, k2, c1, c2, l1_0, l2_0, g]                    #constants
-v = [road_distance, road_vel_profile, road_disp_profile, time]  #constants that change but not depending on the state
+state_0 = [car.mu.x, car.ms.x, car.mu.vy, car.ms.vy]      #initial state x1, x2, v1, v2
+constants = [car.mu.mass, car.ms.mass, car.k1.k, car.k2.k, car.c1.c, car.c2.c, car.k1.l_0, car.k2.l_0]                    #constants
+vars = [road_distance, road_vel_profile, road_disp_profile, time]  #constants that change but not depending on the state
 
 def qcmFunction(x,t):
-    return qcm_dstate(x, v, c, t)
+    return qcm_dstate(x, vars, constants, t)
 
 x_out = odeint(qcmFunction, state_0, time)
 x1_arr = x_out[:,0]
@@ -116,7 +61,7 @@ x2_arr = x_out[:,1]
 v1_arr = x_out[:,2]
 v2_arr = x_out[:,3]
 
-print(x1_arr)
+### black box
 
 #initialize calcs arrays
 a1_arr = np.zeros(len(time)) 
@@ -132,14 +77,21 @@ Fnet2_arr = np.zeros(len(time))
 
 #re calc all extras 
 for i in range(len(time)):
-    a1_arr[i] = qcm_calcs(x1_arr[i], x2_arr[i], v1_arr[i], v2_arr[i], l1_0, l2_0, road_vel_profile[i], road_disp_profile[i], road_distance[i])[1]
-    a2_arr[i] = qcm_calcs(x1_arr[i], x2_arr[i], v1_arr[i], v2_arr[i], l1_0, l2_0, road_vel_profile[i], road_disp_profile[i], road_distance[i])[2]
-    l1_arr[i] = qcm_calcs(x1_arr[i], x2_arr[i], v1_arr[i], v2_arr[i], l1_0, l2_0, road_vel_profile[i], road_disp_profile[i], road_distance[i])[3]
-    l2_arr[i] = qcm_calcs(x1_arr[i], x2_arr[i], v1_arr[i], v2_arr[i], l1_0, l2_0, road_vel_profile[i], road_disp_profile[i], road_distance[i])[4]
-    Fs1_arr[i] = qcm_calcs(x1_arr[i], x2_arr[i], v1_arr[i], v2_arr[i], l1_0, l2_0, road_vel_profile[i], road_disp_profile[i], road_distance[i])[5]
-    Fs2_arr[i] = qcm_calcs(x1_arr[i], x2_arr[i], v1_arr[i], v2_arr[i], l1_0, l2_0, road_vel_profile[i], road_disp_profile[i], road_distance[i])[6]
-    Fd1_arr[i] = qcm_calcs(x1_arr[i], x2_arr[i], v1_arr[i], v2_arr[i], l1_0, l2_0, road_vel_profile[i], road_disp_profile[i], road_distance[i])[7]
-    Fd2_arr[i] = qcm_calcs(x1_arr[i], x2_arr[i], v1_arr[i], v2_arr[i], l1_0, l2_0, road_vel_profile[i], road_disp_profile[i], road_distance[i])[8]
+    car.mu.x = x1_arr[i]
+    car.mu.vy = v1_arr[i]
+    car.ms.x = x2_arr[i]
+    car.ms.vy = v2_arr[i]
+
+    calcs = qcm_calcs_car(car, road_vel_profile[i], road_disp_profile[i], road_distance[i])
+
+    a1_arr[i] = calcs[1]
+    a2_arr[i] = calcs[2]
+    l1_arr[i] = calcs[3]
+    l2_arr[i] = calcs[4]
+    Fs1_arr[i] = calcs[5]
+    Fs2_arr[i] = calcs[6]
+    Fd1_arr[i] = calcs[7]
+    Fd2_arr[i] = calcs[8]
 
     Fnet1_arr[i] = Fs1_arr[i]+ Fd1_arr[i]
     Fnet2_arr[i] = Fs2_arr[i]+ Fd2_arr[i]
