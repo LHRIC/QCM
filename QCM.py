@@ -16,13 +16,13 @@ constant_vel = 15   #m/s
 time = np.linspace(0, endtime, math.floor(endtime/step_time+1))
 
 class Mass:
-    def __init__(self, m, x_0):
+    def __init__(self, m: float, x_0: float):
         self.mass = m
         self.x = x_0
         self.vy = 0
         self.ay = -g
 class QCM:
-    def __init__(self, ms, mu, k, c_percentage):
+    def __init__(self, ms: float, mu: float, k: float, c_percentage: float):
         self.l = (ms * g) / k   # length of spring
         self.mu = Mass(mu, 0)
         self.ms = Mass(ms, self.l)
@@ -46,7 +46,7 @@ positions = road_disp_profile
 velocities = np.gradient(road_vel_profile)
 accelerations = np.gradient(velocities)
 
-def step(qcm_obj, acceleration, velocity, position, time):
+def step(qcm_obj: QCM, acceleration: np.ndarray, velocity: np.ndarray, position: np.ndarray, time: int) -> float:
     spring_delta = qcm_obj.l - max(0, qcm_obj.l - position[time])
     input_force = acceleration[time] * (qcm_obj.mu.mass + qcm_obj.ms.mass)
 
@@ -55,7 +55,7 @@ def step(qcm_obj, acceleration, velocity, position, time):
 #   "Solves" Spring-Damper 2nd Order NH DE
 #   Input: input force, total mass, damper coefficient, instantaneous velocity of system, spring stiffness, position, unsprung mass
 #   Output: acceleration of unsprung mass 
-def qcm_acceleration(f, m_sm, c, vy, k, spring_delta, m_usm):
+def qcm_acceleration(f: float, m_sm: float, c: float, vy: float, k: float, spring_delta: float, m_usm: float) -> float:
     return (f + ((m_sm + m_usm) * g) + (c * vy) + (k * spring_delta)) / m_usm
 
 ## main ##
