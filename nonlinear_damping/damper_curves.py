@@ -23,31 +23,31 @@ curves = [
 settings = [
     "(0-4.3) V-C", # 0
     "(0-4.3) C", 
-    "(0-4.3) V-R", # 1
+    "(0-4.3) V-R",
     "(0-4.3) R", 
-    "(2-4.3) V-C", # 2
+    "(2-4.3) V-C", # 1
     "(2-4.3) C", 
-    "(2-4.3) V-R", # 3
+    "(2-4.3) V-R",
     "(2-4.3) R", 
-    "(4-4.3) V-C", # 4
+    "(4-4.3) V-C", # 2
     "(4-4.3) C", 
-    "(4-4.3) V-R", # 5
+    "(4-4.3) V-R",
     "(4-4.3) R", 
-    "(6-4.3) V-C", # 6
+    "(6-4.3) V-C", # 3
     "(6-4.3) C", 
-    "(6-4.3) V-R", # 7
+    "(6-4.3) V-R",
     "(6-4.3) R", 
-    "(10-4.3) V-C", # 8
+    "(10-4.3) V-C", # 4
     "(10-4.3) C", 
-    "(10-4.3) V-R", # 9
+    "(10-4.3) V-R",
     "(10-4.3) R", 
-    "(15-4.3) V-C", # 10
+    "(15-4.3) V-C", # 5
     "(15-4.3) C", 
-    "(15-4.3) V-R", # 11
+    "(15-4.3) V-R",
     "(15-4.3) R", 
-    "(25-4.3) V-C", # 12
+    "(25-4.3) V-C", # 6
     "(25-4.3) C", 
-    "(25-4.3) V-R", # 13
+    "(25-4.3) V-R",
     "(25-4.3) R"
 ]
 
@@ -63,27 +63,36 @@ def fliparr(arr: list[list[str]]) -> np.ndarray:
     return newarr
 
 
-def setting_to_index_velocity(n: int) -> int:
-    return 2 * n
+def setting_to_index_velocity_compression(n: int) -> int:
+    return 4 * n
 
-def setting_to_index_force(n: int) -> int:
-    return 1 + 2 * n
+def setting_to_index_force_compression(n: int) -> int:
+    return 1 + 4 * n
+
+def setting_to_index_velocity_rebound(n: int) -> int:
+    return 4 * n + 2
+
+def setting_to_index_force_rebound(n: int) -> int:
+    return 3 + 4 * n
 
 def force_damper(velocity: float, curve: int = 0, setting: int = 0) -> float:
+
     # Read the CSV file and convert to numpy array
     with open(f"nonlinear_damping/csv/{curves[curve]}", mode='r') as file:
         reader = csv.reader(file)
         next(reader)  # Skip the header row
         data = [row for row in reader]  
     data = fliparr(data)
-
     # ^^^ dont read the whole file every time, just once and store it somewhere
+
+    # Select the right curve for cases v > 0 or v < 0
+    index_velocity = (4 * setting) if (velocity > 0) else (4 * setting + 2)
 
     # Interpolate the damper force based on the velocity
     return np.interp(
-        velocity, 
-        data[setting_to_index_velocity(setting)], 
-        data[setting_to_index_force(setting)]
+        abs(velocity * 10), 
+        data[index_velocity], 
+        data[index_velocity + 1]
         )
 
 # # Plotting the data

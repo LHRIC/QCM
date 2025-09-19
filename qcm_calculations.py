@@ -71,6 +71,7 @@ def qcm_calcs(x1, x2, v1, v2, l1_0, l2_0, k1, k2, c1, c2, m1, m2, vroad, droad, 
     # defualt to DSD_11_LS 0-4.3 V-C curve for now 
     Fd1 = force_damper(v1-vroad)
     Fd2 = force_damper(v2-v1)
+
     if x1 > (droad + l1_0): #If QQM is off the ground, set bottom damper to zero
         Fd1 = 0
 

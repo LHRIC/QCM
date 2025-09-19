@@ -24,7 +24,8 @@ class Damper:
         self.c = percentage_critical * (2 * math.sqrt(k * m))  #damper coefficient
 
     # defualt to DSD_11_LS 0-4.3 V-C curve for now     
-    def force(velocity: float, curve: int = 0, setting: int = 0) -> float:      
+    def force(self, velocity: float, curve: int = 0, setting: int = 0) -> float:
+        
         return force_damper(velocity, curve, setting)
 
 class QuarterCarModel:
