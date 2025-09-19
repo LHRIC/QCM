@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from constants import *
+from nonlinear_damping.damper_curves import c_damper
 
 # qcm_types.py
 class Mass:
@@ -15,12 +16,16 @@ class Spring:
         self.k = k              #spring stiffness
         self.l_0 = l_0          #spring free length
 
-#TODO make non-linear
+#TODO make non-linear LETS GO WE DID IT
 class Damper:
     def __init__(self, c: float):
         self.c = c              #damper coefficient
     def __init__(self, percentage_critical: float, k: float, m: float):
         self.c = percentage_critical * (2 * math.sqrt(k * m))  #damper coefficient
+
+    # defualt to DSD_11_LS 0-4.3 V-C curve for now     
+    def force(velocity: float, curve: int = 0, setting: int = 0) -> float:      
+        return c_damper(velocity, curve, setting)
 
 class QuarterCarModel:
     def __init__(self, mu: float, ms: float,x1_0: float, x2_0: float, k1: float, k2: float, c1_percentage: float, c2_percentage: float):
