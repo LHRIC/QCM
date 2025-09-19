@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from constants import *
-from nonlinear_damping.damper_curves import c_damper
+from nonlinear_damping.damper_curves import force_damper
 
 # qcm_types.py
 class Mass:
@@ -25,7 +25,7 @@ class Damper:
 
     # defualt to DSD_11_LS 0-4.3 V-C curve for now     
     def force(velocity: float, curve: int = 0, setting: int = 0) -> float:      
-        return c_damper(velocity, curve, setting)
+        return force_damper(velocity, curve, setting)
 
 class QuarterCarModel:
     def __init__(self, mu: float, ms: float,x1_0: float, x2_0: float, k1: float, k2: float, c1_percentage: float, c2_percentage: float):

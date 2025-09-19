@@ -69,7 +69,7 @@ def setting_to_index_velocity(n: int) -> int:
 def setting_to_index_force(n: int) -> int:
     return 1 + 2 * n
 
-def c_damper(velocity: float, curve: int = 0, setting: int = 0) -> float:
+def force_damper(velocity: float, curve: int = 0, setting: int = 0) -> float:
     # Read the CSV file and convert to numpy array
     with open(f"nonlinear_damping/csv/{curves[curve]}", mode='r') as file:
         reader = csv.reader(file)
