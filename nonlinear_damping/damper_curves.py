@@ -62,21 +62,7 @@ def fliparr(arr: list[list[str]]) -> np.ndarray:
                 newarr[j][i] = float(arr[i][j])
     return newarr
 
-
-def setting_to_index_velocity_compression(n: int) -> int:
-    return 4 * n
-
-def setting_to_index_force_compression(n: int) -> int:
-    return 1 + 4 * n
-
-def setting_to_index_velocity_rebound(n: int) -> int:
-    return 4 * n + 2
-
-def setting_to_index_force_rebound(n: int) -> int:
-    return 3 + 4 * n
-
 def force_damper(velocity: float, curve: int = 0, setting: int = 0) -> float:
-
     # Read the CSV file and convert to numpy array
     with open(f"nonlinear_damping/csv/{curves[curve]}", mode='r') as file:
         reader = csv.reader(file)
@@ -90,7 +76,7 @@ def force_damper(velocity: float, curve: int = 0, setting: int = 0) -> float:
 
     # Interpolate the damper force based on the velocity
     return np.interp(
-        abs(velocity * 10), 
+        abs(velocity * 100), 
         data[index_velocity], 
         data[index_velocity + 1]
         )

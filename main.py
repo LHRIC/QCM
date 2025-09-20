@@ -55,7 +55,8 @@ vars = [road_distance, road_vel_profile, road_disp_profile, time]  #constants th
 def qcmFunction(x,t):
     return qcm_dstate(x, vars, constants, t)
 
-x_out = odeint(qcmFunction, state_0, time)
+x_out = odeint(qcmFunction, state_0, time, rtol=1e-4, atol=1e-4)
+
 x1_arr = x_out[:,0]
 x2_arr = x_out[:,1]
 v1_arr = x_out[:,2]
