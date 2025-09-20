@@ -75,6 +75,8 @@ Fd1_arr = np.zeros(len(time))
 Fd2_arr = np.zeros(len(time)) 
 Fnet1_arr = np.zeros(len(time)) 
 Fnet2_arr = np.zeros(len(time)) 
+vd1_arr = np.zeros(len(time)) 
+vd2_arr = np.zeros(len(time)) 
 
 #re calc all extras 
 for i in range(len(time)):
@@ -93,58 +95,70 @@ for i in range(len(time)):
     Fs2_arr[i] = calcs[6]
     Fd1_arr[i] = calcs[7]
     Fd2_arr[i] = calcs[8]
+    vd1_arr[i] = calcs[9]
+    vd2_arr[i] = calcs[10]
 
     Fnet1_arr[i] = Fs1_arr[i]+ Fd1_arr[i]
     Fnet2_arr[i] = Fs2_arr[i]+ Fd2_arr[i]
 
 print(f"Setting: {damper_setting}\nAvg a1: {np.mean(a1_arr)} m/s^2\nStd.dev a1: {np.std(a1_arr)} m/s^2\nMax a1: {max(a1_arr)} m/s^2\nMin a1: {min(a1_arr)} m/s^2")
 
-# fig, axs = plt.subplots(3,2)
-# axs[0,0].plot(time, road_disp_profile*1000, 'tab:brown', label='ground')
-# axs[0,0].set_title('ground (mm)')
-# axs[0,0].legend(ncol=3, loc='upper right')
+fig, axs = plt.subplots(4,2)
+axs[0,0].plot(time, road_disp_profile*1000, 'tab:brown', label='ground')
+axs[0,0].set_title('ground (mm)')
+axs[0,0].legend(ncol=3, loc='upper right')
 
-# axs[1,0].plot(time, x1_arr*1000, 'tab:blue', label='x1')
-# axs[1,0].plot(time, x2_arr*1000, 'tab:red', label='x2')
-# axs[1,0].plot(time, road_disp_profile*1000, 'tab:brown', label='ground')
-# axs[1,0].set_title('ground, x1, and x2 (mm)')
-# axs[1,0].legend(ncol=3, loc='upper right')
+axs[1,0].plot(time, x1_arr*1000, 'tab:blue', label='x1')
+axs[1,0].plot(time, x2_arr*1000, 'tab:red', label='x2')
+axs[1,0].plot(time, road_disp_profile*1000, 'tab:brown', label='ground')
+axs[1,0].set_title('ground, x1, and x2 (mm)')
+axs[1,0].legend(ncol=3, loc='upper right')
 
-# axs[2,0].plot(time, v1_arr, 'tab:blue', label='v1')
-# axs[2,0].plot(time, v2_arr, 'tab:red', label='v2')
-# axs[2,0].set_title('v1, and v2 m/s')
-# axs[2,0].legend(ncol=2, loc='upper right')
+axs[2,0].plot(time, v1_arr, 'tab:blue', label='v1')
+axs[2,0].plot(time, v2_arr, 'tab:red', label='v2')
+axs[2,0].set_title('v1, and v2 m/s')
+axs[2,0].legend(ncol=2, loc='upper right')
 
-# #acceleration has v as placeholder
-# axs[0,1].plot(time, a1_arr, 'tab:blue', label='a1')
-# axs[0,1].plot(time, a2_arr, 'tab:red', label='a2')
-# axs[0,1].set_title('a1, and a2 m/s^2')
-# axs[0,1].legend(ncol=2, loc='upper right')
+#acceleration has v as placeholder
+axs[0,1].plot(time, a1_arr, 'tab:blue', label='a1')
+axs[0,1].plot(time, a2_arr, 'tab:red', label='a2')
+axs[0,1].set_title('a1, and a2 m/s^2')
+axs[0,1].legend(ncol=2, loc='upper right')
 
-# #placeholder for spring lengths as well
-# """Others"""
-# axs[1,1].plot(time, l1_arr, 'tab:blue', label='l1')
-# axs[1,1].plot(time, l2_arr, 'tab:red', label='l2')
-# axs[1,1].set_title('Springs Lengths (x1 to ground and x1 to x2)')
-# axs[1,1].legend(ncol=2, loc='upper right')
+#placeholder for spring lengths as well
+"""Others"""
+axs[1,1].plot(time, l1_arr, 'tab:blue', label='l1')
+axs[1,1].plot(time, l2_arr, 'tab:red', label='l2')
+axs[1,1].set_title('Springs Lengths (x1 to ground and x1 to x2)')
+axs[1,1].legend(ncol=2, loc='upper right')
 
-# #axs[1,1].plot(tlog, v1log, 'tab:red')
-# #axs[1,1].plot(tlog, v2log, 'tab:green')
-# #axs[1,1].set_title('v1, and v2 m/s')
+#axs[1,1].plot(tlog, v1log, 'tab:red')
+#axs[1,1].plot(tlog, v2log, 'tab:green')
+#axs[1,1].set_title('v1, and v2 m/s')
 
-# #placeholder for forces
-# axs[2,1].plot(time, Fnet1_arr, 'tab:blue', label='F Net 1')
-# axs[2,1].plot(time, Fs1_arr, 'tab:cyan', label='F Spring 1')
-# axs[2,1].plot(time, Fd1_arr, 'tab:green', label='F Damper 1')
+#placeholder for forces
+axs[2,1].plot(time, Fnet1_arr, 'tab:blue', label='F Net 1')
+axs[2,1].plot(time, Fs1_arr, 'tab:cyan', label='F Spring 1')
+axs[2,1].plot(time, Fd1_arr, 'tab:green', label='F Damper 1')
 
-# axs[2,1].plot(time, Fnet2_arr, 'tab:red', label='F Net 2')
-# axs[2,1].plot(time, Fs2_arr, 'tab:pink', label='F Spring 2')
-# axs[2,1].plot(time, Fd2_arr, 'tab:orange', label='F Damper 2')
+axs[2,1].plot(time, Fnet2_arr, 'tab:red', label='F Net 2')
+axs[2,1].plot(time, Fs2_arr, 'tab:pink', label='F Spring 2')
+axs[2,1].plot(time, Fd2_arr, 'tab:orange', label='F Damper 2')
 
-# axs[2,1].set_title('Spring Damper Forces (N)')
-# axs[2,1].legend(ncol=2, loc='upper right')
+axs[2,1].set_title('Spring Damper Forces (N)')
+axs[2,1].legend(ncol=2, loc='upper right')
 
-# axs[2,0].set(xlabel='t (sec)')
-# axs[2,1].set(xlabel='t (sec)')
+axs[3,0].set_title('Damper Velocities (m/s)')
+axs[3,0].plot(time, vd1_arr, 'tab:green', label='V Damper 1')
+axs[3,0].plot(time, vd2_arr, 'tab:red', label='V Damper 2')
+axs[3,0].legend(ncol=2, loc='upper right')
 
-# plt.show()
+axs[3,1].set_title('Damper Forces (N)')
+axs[3,1].plot(time, Fd1_arr, 'tab:green', label='F Damper 1')
+axs[3,1].plot(time, Fd2_arr, 'tab:red', label='F Damper 2')
+axs[3,1].legend(ncol=2, loc='upper right')
+
+axs[2,0].set(xlabel='t (sec)')
+axs[2,1].set(xlabel='t (sec)')
+
+plt.show()

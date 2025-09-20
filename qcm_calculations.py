@@ -32,9 +32,12 @@ def qcm_calcs_car(car: qcm_types.QuarterCarModel,vroad, droad, distance):
     Fs1 = -car.k1.k*(l1 - car.k1.l_0)
     Fs2 = -car.k2.k*(l2 - car.k2.l_0)
 
+    vd1 = car.mu.vy - vroad
+    vd2 = car.ms.vy - car.mu.vy
+
     #Damper forces
-    Fd1 = car.c1.force(car.mu.vy - vroad, damper_curve, damper_setting)
-    Fd2 = car.c2.force(car.ms.vy - car.mu.vy, damper_curve, damper_setting)
+    Fd1 = car.c1.c * vd1
+    Fd2 = car.c2.force(vd2, damper_curve, damper_setting)
     if car.mu.x > (droad + car.k1.l_0): #If QQM is off the ground, set bottom damper to zero
         Fd1 = 0
 
@@ -50,7 +53,7 @@ def qcm_calcs_car(car: qcm_types.QuarterCarModel,vroad, droad, distance):
 
     dstate = [dx1, dx2, dv1, dv2]
 
-    return [dstate, dv1, dv2, l1, l2, Fs1, Fs2, Fd1, Fd2]
+    return [dstate, dv1, dv2, l1, l2, Fs1, Fs2, Fd1, Fd2, vd1, vd2]
 
 def qcm_calcs(x1, x2, v1, v2, l1_0, l2_0, k1, k2, c1, c2, m1, m2, vroad, droad, distance):
     #current spring lengths
@@ -69,7 +72,7 @@ def qcm_calcs(x1, x2, v1, v2, l1_0, l2_0, k1, k2, c1, c2, m1, m2, vroad, droad, 
 
     #Damper forces
     # defualt to DSD_11_LS 0-4.3 V-C curve for now 
-    Fd1 = force_damper(v1-vroad, damper_curve, damper_setting)
+    Fd1 = c1*(v1 - vroad)
     Fd2 = force_damper(v2-v1, damper_curve, damper_setting)
 
     if x1 > (droad + l1_0): #If QQM is off the ground, set bottom damper to zero
