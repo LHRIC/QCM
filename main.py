@@ -5,7 +5,7 @@ import roadNoise
 import roadTrapezoid
 import qcm_types
 from scipy import integrate
-from scipy.integrate import odeint
+from scipy.integrate import odeint, solve_ivp
 from scipy.interpolate import CubicSpline
 from constants import *
 from qcm_calculations import *
@@ -52,10 +52,11 @@ state_0 = [car.mu.x, car.ms.x, car.mu.vy, car.ms.vy]      #initial state x1, x2,
 constants = [car.mu.mass, car.ms.mass, car.k1.k, car.k2.k, car.c1.c, car.c2.c, car.k1.l_0, car.k2.l_0]                    #constants
 vars = [road_distance, road_vel_profile, road_disp_profile, time]  #constants that change but not depending on the state
 
-def qcmFunction(x,t):
+def qcmFunction(t, x):
     return qcm_dstate(x, vars, constants, t)
 
-x_out = odeint(qcmFunction, state_0, time, rtol=1e-4, atol=1e-4)
+sol = solve_ivp(qcmFunction, [time[0], time[-1]], state_0, t_eval=time, method='RK45')
+x_out = sol.y.T
 
 x1_arr = x_out[:,0]
 x2_arr = x_out[:,1]
