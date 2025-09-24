@@ -43,13 +43,14 @@ car = qcm_types.QuarterCarModel(mu = 15.0,
                       k1 = 157000, 
                       k2 = 30000, 
                       c1_percentage = 0.2, 
-                      c2_percentage = 0.7)
+                      c2_percentage = 0.7,
+                      motion_ratio = 0.5)
 
 ### black box
 
 #Initial Conditions 
 state_0 = [car.mu.x, car.ms.x, car.mu.vy, car.ms.vy]      #initial state x1, x2, v1, v2
-constants = [car.mu.mass, car.ms.mass, car.k1.k, car.k2.k, car.c1.c, car.c2.c, car.k1.l_0, car.k2.l_0]                    #constants
+constants = [car.mu.mass, car.ms.mass, car.k1.k, car.k2.k, car.c1.c, car.c2.c, car.k1.l_0, car.k2.l_0, car.MR]                    #constants
 vars = [road_distance, road_vel_profile, road_disp_profile, time]  #constants that change but not depending on the state
 
 def qcmFunction(t, x):

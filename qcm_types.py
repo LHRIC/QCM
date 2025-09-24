@@ -29,7 +29,7 @@ class Damper:
         return force_damper(velocity, curve, setting)
 
 class QuarterCarModel:
-    def __init__(self, mu: float, ms: float,x1_0: float, x2_0: float, k1: float, k2: float, c1_percentage: float, c2_percentage: float, motion_ratio = 1):
+    def __init__(self, mu: float, ms: float,x1_0: float, x2_0: float, k1: float, k2: float, c1_percentage: float, c2_percentage: float, motion_ratio: float = 1):
         self.mu = Mass(m = mu, x_0 = x1_0)          #unsprung mass
         self.ms = Mass(m = ms, x_0 = x2_0)          #sprung mass
         self.k1 = Spring(k = k1, l_0 = (self.mu.x) + g * (self.mu.mass + self.ms.mass) / k1)        #tire spring

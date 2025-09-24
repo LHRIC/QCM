@@ -7,14 +7,14 @@ from constants import *
 def qcm_dstate(state, vars, constants, t):
     x1, x2, v1, v2 = state[:]
     distance_road, vel_road, disp_road, time_array = vars[:]
-    m1, m2, k1, k2, c1, c2, l1_0, l2_0 = constants[:]
+    m1, m2, k1, k2, c1, c2, l1_0, l2_0, motion_ratio = constants[:]
     
     #interpolate for these values
     vroad = np.interp(t,time_array, vel_road)
     droad = np.interp(t,time_array, disp_road)
     distance = np.interp(t,time_array, distance_road)
 
-    dstate = qcm_calcs(x1, x2, v1, v2, l1_0, l2_0, k1, k2, c1, c2, m1, m2, vroad, droad, distance)[0]
+    dstate = qcm_calcs(x1, x2, v1, v2, l1_0, l2_0, k1, k2, c1, c2, m1, m2, vroad, droad, distance, motion_ratio)[0]
     return dstate
 
 def qcm_calcs_car(car: qcm_types.QuarterCarModel,vroad, droad, distance):
@@ -37,7 +37,7 @@ def qcm_calcs_car(car: qcm_types.QuarterCarModel,vroad, droad, distance):
 
     #Damper forces
     Fd1 = car.c1.c * vd1
-    Fd2 = car.c2.force(vd2, damper_curve, damper_setting)
+    Fd2 = car.c2.force(vd2, damper_curve, damper_setting) * (car.MR ** 2)
     if car.mu.x > (droad + car.k1.l_0): #If QQM is off the ground, set bottom damper to zero
         Fd1 = 0
 
@@ -55,7 +55,7 @@ def qcm_calcs_car(car: qcm_types.QuarterCarModel,vroad, droad, distance):
 
     return [dstate, dv1, dv2, l1, l2, Fs1, Fs2, Fd1, Fd2, vd1, vd2]
 
-def qcm_calcs(x1, x2, v1, v2, l1_0, l2_0, k1, k2, c1, c2, m1, m2, vroad, droad, distance):
+def qcm_calcs(x1, x2, v1, v2, l1_0, l2_0, k1, k2, c1, c2, m1, m2, vroad, droad, distance, motion_ratio = 1):
     #current spring lengths
     l1 = x1 - droad
     l2 = x2 - x1
@@ -73,7 +73,7 @@ def qcm_calcs(x1, x2, v1, v2, l1_0, l2_0, k1, k2, c1, c2, m1, m2, vroad, droad, 
     #Damper forces
     # defualt to DSD_11_LS 0-4.3 V-C curve for now 
     Fd1 = c1*(v1 - vroad)
-    Fd2 = force_damper(v2-v1, damper_curve, damper_setting)
+    Fd2 = force_damper(v2-v1, damper_curve, damper_setting) * (motion_ratio ** 2)
 
     if x1 > (droad + l1_0): #If QQM is off the ground, set bottom damper to zero
         Fd1 = 0
