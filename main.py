@@ -44,7 +44,7 @@ car = qcm_types.QuarterCarModel(mu = 15.0,
                       k2 = 30000, 
                       c1_percentage = 0.2, 
                       c2_percentage = 0.7,
-                      motion_ratio = 0.5)
+                      motion_ratio = 1)
 
 ### black box
 

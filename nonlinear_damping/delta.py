@@ -6,7 +6,7 @@ import math
 # crit_damp.py
 max_velocity = 200 / 1000 # (mm/s)
 step = 5 / 1000        # (mm/s)
-curve = 1
+curve = 2
 
 class Damper:
     def __init__(self, c: float):
@@ -27,7 +27,7 @@ general_damper = Damper(
 )
 
 velocities = np.arange(0, max_velocity + step, step)
-for j in range(0, 5):
+for j in range(0, 7):
     nl_damper = np.zeros(len(velocities))
     l_damper = np.zeros(len(velocities))
     delta = np.zeros(len(velocities))
@@ -42,7 +42,7 @@ for j in range(0, 5):
     print(f"Min delta: {np.min(delta)}")
     print(f"Mean delta: {np.mean(delta)}\n")
 
-# plt.plot(velocities, nl_damper, label='Non-Linear Damper (DSD_11_LS 0-4.3 V-C)')
+# plt.plot(velocities, nl_damper, label='Non-Linear Damper (DSD_12_LS)')
 # plt.plot(velocities, l_damper, label='Linear Damper (100% Critical)')
 # # plt.plot(velocities, delta, label='Difference (Non-Linear - Linear)')
 # plt.xlabel('Velocity (mm/s)')

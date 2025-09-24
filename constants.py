@@ -10,5 +10,5 @@ time = np.linspace(0, endtime, math.floor(endtime/step_time+1))
 
 # damper_curves settings
 
-damper_curve = 0      #damper curve
-damper_setting = 0    #curve setting
+damper_curve = 2      #damper curve
+damper_setting = 2    #curve setting
