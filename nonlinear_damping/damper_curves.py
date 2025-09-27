@@ -75,10 +75,11 @@ def force_damper(velocity: float, curve: int = 0, setting: int = 0) -> float:
 
     # Select the right curve for cases v > 0 or v < 0
     index_velocity = (4 * setting) if (velocity > 0) else (4 * setting + 2)
+    velocity = min(abs(velocity) * 1000, 250)       # set a max on velocity for interp purposes; force(∞ m/s) ≈ force(250 m/s) anyway 
 
     # Interpolate the damper force based on the velocity
     return np.interp(
-        abs(velocity * 100), # convert m -> mm
+        abs(velocity), # convert m -> mm
         data[index_velocity], 
         data[index_velocity + 1]
         )

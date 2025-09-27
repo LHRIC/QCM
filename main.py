@@ -44,9 +44,8 @@ car = qcm_types.QuarterCarModel(mu = 15.0,
                       k2 = 30000, 
                       c1_percentage = 0.2, 
                       c2_percentage = 0.7,
-                      motion_ratio = 1)
-
-### black box
+                      motion_ratio = 1.2
+                      )
 
 #Initial Conditions 
 state_0 = [car.mu.x, car.ms.x, car.mu.vy, car.ms.vy]      #initial state x1, x2, v1, v2
